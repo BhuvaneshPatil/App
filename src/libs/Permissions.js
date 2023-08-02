@@ -31,7 +31,7 @@ function canUsePayWithExpensify(betas) {
  * @returns {Boolean}
  */
 function canUseDefaultRooms(betas) {
-    return _.contains(betas, CONST.BETAS.DEFAULT_ROOMS) || canUseAllBetas(betas);
+    return true;
 }
 
 /**
@@ -67,7 +67,7 @@ function canUseCommentLinking(betas) {
  * @returns {Boolean}
  */
 function canUsePolicyRooms(betas) {
-    return _.contains(betas, CONST.BETAS.POLICY_ROOMS) || canUseAllBetas(betas);
+    return true;
 }
 
 /**

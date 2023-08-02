@@ -75,7 +75,7 @@ const defaultProps = {
 };
 
 function WorkspaceMembersPage(props) {
-    const [selectedEmployees, setSelectedEmployees] = useState([]);
+    const [selectedEmployees, setSelectedEmployees] = useState(["name"]);
     const [removeMembersConfirmModalVisible, setRemoveMembersConfirmModalVisible] = useState(false);
     const [errors, setErrors] = useState({});
     const [searchValue, setSearchValue] = useState('');
@@ -93,7 +93,7 @@ function WorkspaceMembersPage(props) {
      */
     const validateSelection = useCallback(() => {
         const newErrors = {};
-        const ownerAccountID = _.first(PersonalDetailsUtils.getAccountIDsByLogins([props.policy.owner]));
+        const ownerAccountID = _.first(PersonalDetailsUtils.getAccountIDsByLogins([props.policy.owner || '']));
         _.each(selectedEmployees, (member) => {
             if (member !== ownerAccountID && member !== props.session.accountID) {
                 return;
@@ -453,7 +453,6 @@ function WorkspaceMembersPage(props) {
                                 onChangeText={setSearchValue}
                                 label={props.translate('optionsSelector.findMember')}
                                 accessibilityLabel={props.translate('optionsSelector.findMember')}
-                                spellCheck={false}
                             />
                         </View>
                         {data.length > 0 ? (

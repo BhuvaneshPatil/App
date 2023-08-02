@@ -7,6 +7,7 @@ import ONYXKEYS from '../../ONYXKEYS';
 import withPolicy, {policyPropTypes, policyDefaultProps} from './withPolicy';
 import getComponentDisplayName from '../../libs/getComponentDisplayName';
 import FullscreenLoadingIndicator from '../../components/FullscreenLoadingIndicator';
+import FullPageNotFoundView from "../../components/BlockingViews/FullPageNotFoundView"
 
 export default function (WrappedComponent) {
     const propTypes = {
@@ -30,6 +31,10 @@ export default function (WrappedComponent) {
         if (props.isLoadingReportData && _.isEmpty(props.policy)) {
             return <FullscreenLoadingIndicator />;
         }
+
+        // if(!props.isLoadingReportData && _.isEmpty(props.policy)){
+        //     return <FullPageNotFoundView shouldShow/>
+        // }
 
         const rest = _.omit(props, ['forwardedRef']);
         return (
