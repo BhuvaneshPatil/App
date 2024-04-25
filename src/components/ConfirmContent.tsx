@@ -1,7 +1,9 @@
-import type {ReactNode} from 'react';
-import React from 'react';
-import type {StyleProp, TextStyle, ViewStyle} from 'react-native';
-import {View} from 'react-native';
+import type { ReactNode } from 'react';
+import React, { useEffect, useRef } from 'react';
+import type { StyleProp, TextStyle, ViewStyle } from 'react-native';
+import useArrowKeyFocusManager from '@hooks/useArrowKeyFocusManager';
+import useKeyboardShortcut from '@hooks/useKeyboardShortcut';
+import { View } from 'react-native';
 import useLocalize from '@hooks/useLocalize';
 import useNetwork from '@hooks/useNetwork';
 import useStyleUtils from '@hooks/useStyleUtils';
@@ -16,6 +18,8 @@ import Header from './Header';
 import Icon from './Icon';
 import ImageSVG from './ImageSVG';
 import Text from './Text';
+import useDelayedInputFocus from '@hooks/useDelayedInputFocus';
+import { useFocusEffect } from '@react-navigation/native';
 
 type ConfirmContentProps = {
     /** Title of the modal */
@@ -76,7 +80,7 @@ type ConfirmContentProps = {
 function ConfirmContent({
     title,
     onConfirm,
-    onCancel = () => {},
+    onCancel = () => { },
     confirmText = '',
     cancelText = '',
     prompt = '',
@@ -94,13 +98,45 @@ function ConfirmContent({
     image,
 }: ConfirmContentProps) {
     const styles = useThemeStyles();
-    const {translate} = useLocalize();
+    const { translate } = useLocalize();
     const theme = useTheme();
-    const {isOffline} = useNetwork();
+    const { isOffline } = useNetwork();
     const StyleUtils = useStyleUtils();
 
-    const isCentered = shouldCenterContent;
+    const buttonRefs = useRef<HTMLDivElement[] | View[]>([])
 
+    const isCentered = shouldCenterContent;
+    const [focusedIndex, setFocusedIndex] = useArrowKeyFocusManager(
+        {
+            maxIndex: 1,
+            initialFocusedIndex: 0,
+        }
+    )
+    useKeyboardShortcut(
+        CONST.KEYBOARD_SHORTCUTS.ARROW_UP,
+        () => {
+            if (!(focusedIndex > 0)) {
+                return;
+            }
+            setFocusedIndex(focusedIndex - 1);
+        }
+    );
+
+    useEffect(() => {
+        if (buttonRefs.current && buttonRefs.current.length > 0) {
+            buttonRefs.current[focusedIndex].focus();
+        }
+    }, [focusedIndex])
+
+    useKeyboardShortcut(
+        CONST.KEYBOARD_SHORTCUTS.ARROW_DOWN,
+        () => {
+            if (focusedIndex >= buttonRefs.current.length - 1) {
+                return;
+            }
+            setFocusedIndex(focusedIndex + 1);
+        }
+    );
     return (
         <>
             {!!image && (
@@ -148,6 +184,12 @@ function ConfirmContent({
                             large
                             text={confirmText || translate('common.yes')}
                             isDisabled={isOffline && shouldDisableConfirmButtonWhenOffline}
+                            ref={(ref) => {
+                                if (!ref) {
+                                    return;
+                                }
+                                buttonRefs.current[0] = ref;
+                            }}
                         />
                         {shouldShowCancelButton && (
                             <Button
@@ -155,6 +197,12 @@ function ConfirmContent({
                                 onPress={onCancel}
                                 large
                                 text={cancelText || translate('common.no')}
+                                ref={(ref) => {
+                                    if (!ref) {
+                                        return;
+                                    }
+                                    buttonRefs.current[1] = ref;
+                                }}
                             />
                         )}
                     </>
@@ -166,6 +214,12 @@ function ConfirmContent({
                                 onPress={onCancel}
                                 text={cancelText || translate('common.no')}
                                 medium
+                                ref={(ref) => {
+                                    if (!ref) {
+                                        return;
+                                    }
+                                    buttonRefs.current[0] = ref;
+                                }}
                             />
                         )}
                         <Button
@@ -177,6 +231,12 @@ function ConfirmContent({
                             text={confirmText || translate('common.yes')}
                             isDisabled={isOffline && shouldDisableConfirmButtonWhenOffline}
                             medium
+                            ref={(ref) => {
+                                if (!ref) {
+                                    return;
+                                }
+                                buttonRefs.current[1] = ref;
+                            }}
                         />
                     </View>
                 )}
